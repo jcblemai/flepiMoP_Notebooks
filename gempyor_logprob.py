@@ -80,9 +80,18 @@ def run_simulation(snpi_df_in, hnpi_df_in, modinf, p_draw, unique_strings, trans
 
 def compute_likelyhood(model_df, gt, modinf, statistics):
     log_loss = 0
+    
     for subpop in modinf.subpop_struct.subpop_names:
-        gt_s = gt[gt["subpop"]==subpop].loc[modinf.ti:modinf.tf].drop(["subpop"],axis=1).resample("W-SAT").sum()
-        model_df_s = model_df[model_df["subpop"]==subpop].drop(["subpop","time"],axis=1).loc[min(gt_s.index):max(gt_s.index)].resample("W-SAT").sum() # todo sub subpop here
+        # essential to sort by index (date here)
+        gt_s = gt[gt["subpop"]==subpop].sort_index()
+        model_df_s = model_df[model_df["subpop"]==subpop].sort_index()
+
+        # places where data and model overlap
+        first_date = max(gt_s.index.min(), model_df_s.index.min())
+        last_date = min(gt_s.index.max(), model_df_s.index.max())
+
+        gt_s = gt_s.loc[first_date:last_date].drop(["subpop"],axis=1).resample("W-SAT").sum()
+        model_df_s = model_df_s.drop(["subpop","time"],axis=1).loc[first_date:last_date].resample("W-SAT").sum() # todo sub subpop here
         for key, value in statistics.items():
             assert model_df_s[key].shape == gt_s[value].shape
 
@@ -103,9 +112,9 @@ def input_proposal(proposal, snpi_df_ref, hnpi_df_ref, fitted_params, ndim):
 
     for i in range(ndim):
         if fitted_params["ptype"][i] == "snpi":
-            snpi_df_mod.loc[snpi_df_mod["npi_name"] == fitted_params["pname"][i],"reduction"] = proposal[i]
+            snpi_df_mod.loc[snpi_df_mod["modifier_name"] == fitted_params["pname"][i],"value"] = proposal[i]
         elif fitted_params["ptype"][i] == "hnpi":
-            hnpi_df_mod.loc[hnpi_df_mod["npi_name"] == fitted_params["pname"][i],"reduction"] = proposal[i]
+            hnpi_df_mod.loc[hnpi_df_mod["modifier_name"] == fitted_params["pname"][i],"value"] = proposal[i]
 
     return snpi_df_mod, hnpi_df_mod
 
