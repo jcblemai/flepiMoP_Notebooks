@@ -15,7 +15,8 @@ import scipy
 
 
 
-def run_simulation(snpi_df_in, hnpi_df_in, modinf, p_draw, unique_strings, transition_array, proportion_array, proportion_info, initial_conditions, seeding_data, seeding_amounts,outcomes_parameters):
+def run_simulation(snpi_df_in, hnpi_df_in, modinf, p_draw, unique_strings, transition_array, proportion_array, proportion_info, initial_conditions, seeding_data, seeding_amounts,outcomes_parameters, save=False):
+    random_id = np.random.randint(0,1e8)
     npi_seir = seir.build_npi_SEIR(
         modinf=modinf, load_ID=False, sim_id2load=None, config=config, 
         bypass_DF=snpi_df_in
@@ -53,10 +54,10 @@ def run_simulation(snpi_df_in, hnpi_df_in, modinf, p_draw, unique_strings, trans
         seeding_data_nbdict,
         seeding_amounts,
     )
+    seir_out_df = seir.states2Df(modinf, states)
+    if save:
+        modinf.write_simID(ftype="seir", sim_id=random_id, df=seir_out_df)
 
-    seir_out_df = seir.postprocess_and_write(
-        0, modinf, states, p_draw, npi_seir, seeding_data
-    )
 
     outcomes_df, hpar_df = outcomes.compute_all_multioutcomes(
         modinf=modinf,
@@ -74,6 +75,10 @@ def run_simulation(snpi_df_in, hnpi_df_in, modinf, p_draw, unique_strings, trans
         npi=npi_outcomes,
     )
     outcomes_df = outcomes_df.set_index("date")
+    outcomes_df["time"] = outcomes_df["date"]
+    
+    if save:
+        modinf.write_simID(ftype="hosp", sim_id=random_id, df=outcomes_df)
 
     return outcomes_df
 
