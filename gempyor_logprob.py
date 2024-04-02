@@ -74,8 +74,9 @@ def run_simulation(snpi_df_in, hnpi_df_in, modinf, p_draw, unique_strings, trans
         hpar=hpar_df,
         npi=npi_outcomes,
     )
+    # outcomes_df["time"] = outcomes_df["date"] which one should it be ?
     outcomes_df = outcomes_df.set_index("date")
-    outcomes_df["time"] = outcomes_df["date"]
+    
     
     if save:
         modinf.write_simID(ftype="hosp", sim_id=random_id, df=outcomes_df)
@@ -117,16 +118,16 @@ def input_proposal(proposal, snpi_df_ref, hnpi_df_ref, fitted_params, ndim):
 
     for i in range(ndim):
         if fitted_params["ptype"][i] == "snpi":
-            snpi_df_mod.loc[snpi_df_mod["modifier_name"] == fitted_params["pname"][i],"value"] = proposal[i]
+            snpi_df_mod.loc[(snpi_df_mod["modifier_name"] == fitted_params["pname"][i]) & (snpi_df_mod["subpop"] == fitted_params["subpop"][i]),"value"] = proposal[i]
         elif fitted_params["ptype"][i] == "hnpi":
-            hnpi_df_mod.loc[hnpi_df_mod["modifier_name"] == fitted_params["pname"][i],"value"] = proposal[i]
+            hnpi_df_mod.loc[(hnpi_df_mod["modifier_name"] == fitted_params["pname"][i]) & (hnpi_df_mod["subpop"] == fitted_params["subpop"][i]),"value"] = proposal[i]
 
     return snpi_df_mod, hnpi_df_mod
 
 
 
 
-def log_prob(proposal, snpi_df_ref, ndim, statistics, fitted_params, gt, hnpi_df_ref, modinf, p_draw, unique_strings, transition_array, proportion_array, proportion_info, initial_conditions, seeding_data, seeding_amounts,outcomes_parameters):
+def log_prob(proposal, snpi_df_ref, ndim, statistics, fitted_params, gt, hnpi_df_ref, modinf, p_draw, unique_strings, transition_array, proportion_array, proportion_info, initial_conditions, seeding_data, seeding_amounts,outcomes_parameters, save=False):
     if not check_in_bounds(proposal=proposal, fitted_params=fitted_params):
         print("OUT OF BOUND!!")
         return -np.inf
@@ -135,7 +136,7 @@ def log_prob(proposal, snpi_df_ref, ndim, statistics, fitted_params, gt, hnpi_df
 
     outcomes_df = run_simulation(snpi_df_mod, 
                                 hnpi_df_mod,
-                                modinf, p_draw, unique_strings, transition_array, proportion_array, proportion_info, initial_conditions, seeding_data, seeding_amounts,outcomes_parameters)
+                                modinf, p_draw, unique_strings, transition_array, proportion_array, proportion_info, initial_conditions, seeding_data, seeding_amounts,outcomes_parameters, save=save)
 
     llik = compute_likelyhood(model_df=outcomes_df, gt=gt, modinf=modinf, statistics=statistics)
     print(f"llik is {llik}")
