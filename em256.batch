@@ -9,6 +9,3 @@
 module purge
 
 /nas/longleaf/rhel8/apps/anaconda/2021.11/bin/python -u  emcee_rsv_256.py > out_fit256.out 2>&1
-
-
-
