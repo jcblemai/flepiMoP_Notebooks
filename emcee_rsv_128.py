@@ -325,12 +325,12 @@ with Pool(ncpu) as pool:
 
 results = []
 for fn in gempyor.utils.list_filenames(folder="model_output/", filters=[run_id,"hosp.parquet"]):
-
-    df = gempyor.read_df(fn)
-    #raise ValueError
-    df["date"] = df["time"]
-    df = df.set_index("date")
-    results.append(df)
+    if "000000000" not in fn:
+        df = gempyor.read_df(fn)
+        #raise ValueError
+        df["date"] = df["time"]
+        df = df.set_index("date")
+        results.append(df)
 
 fig, axes = plt.subplots(len(statistics),len(subpop_names), figsize=(5*len(subpop_names), 3*len(statistics)), sharex=True, dpi=300)
 for j, subpop in enumerate(modinf.subpop_struct.subpop_names):
