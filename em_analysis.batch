@@ -1,9 +1,8 @@
 #!/bin/bash
 #SBATCH -N 1
 #SBATCH -n 1
-#SBATCH -p general
-#SBATCH --mem=128g
-#SBATCH -c 64
+#SBATCH --mem=360g
+#SBATCH -c 48
 #SBATCH -t 00-5:00:00
 # 1 node (N) 1 task (n) to the general partition  for 7days, with this task needing 6 cpus. Note: Because the default is one cpu per task, -n 1 can be thought of as requesting just one cpu.
 module purge

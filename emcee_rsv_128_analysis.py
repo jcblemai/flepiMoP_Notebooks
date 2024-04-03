@@ -41,7 +41,7 @@ data_dir = "."  # necessary for now for time serie parameters !!! fixme
 
 # %%
 config_path = f"config_CACOMD_maternal_v8_emcee.yml"
-nwalkers = 64
+nwalkers = 128
 niter = 400
 nsamples = 200 # number of likelyhood eval to write to disk...
 
