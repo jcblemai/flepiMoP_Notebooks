@@ -41,7 +41,7 @@ data_dir = "."  # necessary for now for time serie parameters !!! fixme
 
 # %%
 config_path = f"config_rsvnet_emcee.yml"
-nwalkers = 256
+nwalkers = 64
 niter = 400
 nsamples = 200 # number of likelyhood eval to write to disk...
 
