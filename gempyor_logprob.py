@@ -18,7 +18,7 @@ import scipy
 def run_simulation(snpi_df_in, hnpi_df_in, modinf, p_draw, unique_strings, transition_array, proportion_array, proportion_info, initial_conditions, seeding_data, seeding_amounts,outcomes_parameters, save=False):
     np.random.seed(int.from_bytes(os.urandom(4), byteorder='little'))
     random_id = np.random.randint(0,1e8)
-    print(f"RRRRR is {random_id}"
+    print(f"RRRRR is {random_id}")
     npi_seir = seir.build_npi_SEIR(
         modinf=modinf, load_ID=False, sim_id2load=None, config=config, 
         bypass_DF=snpi_df_in
