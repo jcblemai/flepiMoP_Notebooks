@@ -40,7 +40,7 @@ os.chdir(data_dir)
 data_dir = "."  # necessary for now for time serie parameters !!! fixme 
 
 # %%
-config_path = f"config_rsvnet_emcee.yml"
+config_path = f"config_CACOMD_maternal_v8_emcee.yml"
 nwalkers = 64
 niter = 400
 nsamples = 200 # number of likelyhood eval to write to disk...
@@ -80,8 +80,8 @@ modinf = model_info.ModelInfo(
     first_sim_index=1,
     in_run_id=in_run_id,
     in_prefix=in_prefix,
-    inference_filename_prefix="no",
-    inference_filepath_suffix="no",
+    inference_filename_prefix="no_analysis",
+    inference_filepath_suffix="no_analysis",
     out_run_id=out_run_id,
     out_prefix=out_prefix,
     stoch_traj_flag=False,
@@ -262,17 +262,7 @@ for i in range(nwalkers):
 
 
 # %%
-filename = f"{run_id}_backend.h5"
-backend = emcee.backends.HDFBackend(filename)
-backend.reset(nwalkers, ndim)
-
-with Pool(ncpu) as pool:
-    sampler = emcee.EnsembleSampler(nwalkers, ndim, log_prob, 
-                                    args=[snpi_df_ref, ndim, statistics, fitted_params, gt, hnpi_df_ref, modinf, p_draw, unique_strings, transition_array, proportion_array, proportion_info, initial_conditions, seeding_data, seeding_amounts,outcomes_parameters, False], 
-                                    pool=pool,
-                                    backend=backend, moves=[(emcee.moves.StretchMove(live_dangerously=True), 1)])
-    state = sampler.run_mcmc(p0, niter, progress=True, skip_initial_state_check=True)
-
+filename = f"{run_id}_backend_sav.h5"
 print("done emcee, doing sampling")
 # %%
 backend = emcee.backends.HDFBackend(filename)
