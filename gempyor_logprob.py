@@ -76,12 +76,14 @@ def run_simulation(snpi_df_in, hnpi_df_in, modinf, p_draw, unique_strings, trans
         hpar=hpar_df,
         npi=npi_outcomes,
     )
-    # outcomes_df["time"] = outcomes_df["date"] which one should it be ?
-    outcomes_df = outcomes_df.set_index("date")
+    outcomes_df["time"] = outcomes_df["date"] #which one should it be ?
+    
     
     
     if save:
         modinf.write_simID(ftype="hosp", sim_id=random_id, df=outcomes_df)
+    # needs to be after write... because parquet write discard the index.
+    outcomes_df = outcomes_df.set_index("date")
 
     return outcomes_df
 
@@ -98,14 +100,15 @@ def compute_likelyhood(model_df, gt, modinf, statistics):
         first_date = max(gt_s.index.min(), model_df_s.index.min())
         last_date = min(gt_s.index.max(), model_df_s.index.max())
 
-        gt_s = gt_s.loc[first_date:last_date].drop(["subpop"],axis=1).resample("W-SAT").sum()
-        model_df_s = model_df_s.drop(["subpop","time"],axis=1).loc[first_date:last_date].resample("W-SAT").sum() # todo sub subpop here
+        gt_s = gt_s.loc[first_date:last_date].drop(["subpop"],axis=1).resample("W-SAT").agg(pd.Series.sum, skipna=False) # if one NA in the interval, skip the itnerval  (see https://stackoverflow.com/questions/54252106/while-resampling-put-nan-in-the-resulting-value-if-there-are-some-nan-values-in)
+        model_df_s = model_df_s.drop(["subpop","time"],axis=1).loc[first_date:last_date].resample("W-SAT").agg(pd.Series.sum, skipna=False) # todo sub subpop here
         for key, value in statistics.items():
             assert model_df_s[key].shape == gt_s[value].shape
 
-            log_loss += sum((model_df_s[key]-gt_s[value])**2)
+            log_loss += np.nansum((model_df_s[key]-gt_s[value])**2)
 
     return -log_loss
+
 
 
 def check_in_bounds(proposal, fitted_params):
