@@ -4,7 +4,7 @@
 #SBATCH -p general
 #SBATCH --mem=230g
 #SBATCH -c 56
-#SBATCH -t 00-10:00:00
+#SBATCH -t 00-20:00:00
 # 1 node (N) 1 task (n) to the general partition  for 7days, with this task needing 6 cpus. Note: Because the default is one cpu per task, -n 1 can be thought of as requesting just one cpu.
 module purge
 /nas/longleaf/rhel8/apps/anaconda/2021.11/bin/python  -u  emcee_rsv_128.py > out_fit128.out 2>&1
