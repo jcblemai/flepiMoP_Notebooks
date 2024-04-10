@@ -12,17 +12,20 @@ import os
 import pandas as pd
 from gempyor import config, outcomes, seir
 import scipy
-
-
+import xarray as xr
 
 def run_simulation(snpi_df_in, hnpi_df_in, modinf, p_draw, unique_strings, transition_array, proportion_array, proportion_info, initial_conditions, seeding_data, seeding_amounts,outcomes_parameters, save=False):
+    
+    # We need to reseed because subprocess inherit of the same random generator state.
     np.random.seed(int.from_bytes(os.urandom(4), byteorder='little'))
     random_id = np.random.randint(0,1e8)
-    print(f"RRRRR is {random_id}")
+
+
     npi_seir = seir.build_npi_SEIR(
         modinf=modinf, load_ID=False, sim_id2load=None, config=config, 
         bypass_DF=snpi_df_in
     )
+
     if modinf.npi_config_outcomes:
         npi_outcomes = outcomes.build_outcome_modifiers(
                     modinf=modinf,
@@ -34,11 +37,12 @@ def run_simulation(snpi_df_in, hnpi_df_in, modinf, p_draw, unique_strings, trans
 
     # reduce them
     parameters = modinf.parameters.parameters_reduce(p_draw, npi_seir)
-            # Parse them
+    # Parse them
     parsed_parameters = modinf.compartments.parse_parameters(
         parameters, modinf.parameters.pnames, unique_strings
     )
 
+    # Convert the seeding data dictionnary to a numba dictionnary
     seeding_data_nbdict = nb.typed.Dict.empty(
         key_type=nb.types.unicode_type,
         value_type=nb.types.int64[:])
@@ -46,6 +50,7 @@ def run_simulation(snpi_df_in, hnpi_df_in, modinf, p_draw, unique_strings, trans
     for k,v in seeding_data.items():
         seeding_data_nbdict[k] = np.array(v, dtype=np.int64)
 
+    # Compute the SEIR simulation
     states = seir.steps_SEIR(
         modinf,
         parsed_parameters,
@@ -56,18 +61,15 @@ def run_simulation(snpi_df_in, hnpi_df_in, modinf, p_draw, unique_strings, trans
         seeding_data_nbdict,
         seeding_amounts,
     )
-    seir_out_df = seir.states2Df(modinf, states)
-    if save:
-        modinf.write_simID(ftype="seir", sim_id=random_id, df=seir_out_df)
 
-
+    # Compute outcomes
     outcomes_df, hpar_df = outcomes.compute_all_multioutcomes(
         modinf=modinf,
         sim_id2write=0,
         parameters=outcomes_parameters,
         loaded_values=None,
         npi=npi_outcomes,
-        bypass_seir=seir_out_df
+        bypass_seir_xr=states
     )
     outcomes_df, hpar, hnpi = outcomes.postprocess_and_write(
         sim_id=0,
