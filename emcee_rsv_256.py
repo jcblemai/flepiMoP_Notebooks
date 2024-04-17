@@ -1,10 +1,8 @@
-# %%
 import gempyor
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
-import datetime
-import glob, os, sys, re, shutil
+import os
 from pathlib import Path
 
 # import seaborn as sns
@@ -24,9 +22,7 @@ import pyarrow.parquet as pq
 from gempyor import config, model_info, outcomes, seir
 from multiprocessing import cpu_count
 import emcee
-
 from multiprocessing import Pool
-from gempyor_logprob import log_prob, compute_likelyhood, check_in_bounds, run_simulation, input_proposal
 
 # disable  operations using the MKL linear algebra.
 os.environ["OMP_NUM_THREADS"] = "1"

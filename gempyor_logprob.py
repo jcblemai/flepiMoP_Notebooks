@@ -14,6 +14,7 @@ from gempyor import config, outcomes, seir
 import scipy
 import xarray as xr
 
+
 def run_simulation(snpi_df_in, hnpi_df_in, modinf, p_draw, unique_strings, transition_array, proportion_array, proportion_info, initial_conditions, seeding_data, seeding_amounts,outcomes_parameters, save=False):
     
     # We need to reseed because subprocess inherit of the same random generator state.
@@ -79,7 +80,6 @@ def run_simulation(snpi_df_in, hnpi_df_in, modinf, p_draw, unique_strings, trans
         npi=npi_outcomes,
     )
     outcomes_df["time"] = outcomes_df["date"] #which one should it be ?
-    
     
     
     if save:
