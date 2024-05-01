@@ -8,4 +8,6 @@
 # 1 node (N) 1 task (n) to the general partition  for 7days, with this task needing 6 cpus. Note: Because the default is one cpu per task, -n 1 can be thought of as requesting just one cpu.
 module purge
 
-/nas/longleaf/rhel8/apps/anaconda/2021.11/bin/python -u  emcee_rsv_256.py > out_fit256.out 2>&1
+#/nas/longleaf/rhel8/apps/anaconda/2021.11/bin/python -u  emcee_rsv_256.py > out_fit256.out 2>&1
+
+flepimop-calibrate -c config_SMH_R18_allBoo_highIE_blk1_emcee.yml -p COVID19_USA/ --nslots 3500 --nsamples 150 --jobs 256 --niterations 100 --id calib_R18  > out_fit256.out 2>&1
